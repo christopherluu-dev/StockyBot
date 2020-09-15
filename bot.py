@@ -1,7 +1,10 @@
 import os
 import requests
+import pandas_datareader.data as web
+import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 from discord.ext import commands
+from retrieve import get_daily_info
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -16,8 +19,9 @@ async def on_ready():
     
 @bot.command(name='tick')
 async def check_tick(ctx, arg):
-    url = 'https://finnhub.io/api/v1/quote?symbol=%s&token=%s' % (arg, FINNHUB)
-    url_info = 'https://finnhub.io/api/v1/stock/profile2?symbol=%s&token=%s' % (arg, FINNHUB)
+    symbol = arg.upper()
+    url = 'https://finnhub.io/api/v1/quote?symbol=%s&token=%s' % (symbol, FINNHUB)
+    url_info = 'https://finnhub.io/api/v1/stock/profile2?symbol=%s&token=%s' % (symbol, FINNHUB)
 
     r = requests.get(url)
     r_info = requests.get(url_info)
@@ -25,6 +29,9 @@ async def check_tick(ctx, arg):
     print(r.json())
     print(r_info.json())
     
+    start = '2020-09-14'
+    end = '2020-09-14'
+
     response = r.json()
     response_info = r_info.json()
 
@@ -35,7 +42,8 @@ async def check_tick(ctx, arg):
     closing = response['pc']
     high = response['h']
     low = response['l']
-    
+   
+    get_daily_info(symbol)
     print(company_name, company_url, current, opening, closing, high, low)
 
 bot.run(TOKEN)

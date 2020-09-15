@@ -1,3 +1,6 @@
 .env
 .vim/coc-settings.json
 env/
+__pycache__/
+chart.png
+data.csv
