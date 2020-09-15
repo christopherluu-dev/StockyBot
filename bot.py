@@ -1,7 +1,5 @@
 import os
 import requests
-import pandas_datareader.data as web
-import matplotlib.pyplot as plt
 import discord
 from dotenv import load_dotenv
 from discord.ext import commands
