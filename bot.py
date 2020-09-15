@@ -2,6 +2,7 @@ import os
 import requests
 import pandas_datareader.data as web
 import matplotlib.pyplot as plt
+import discord
 from dotenv import load_dotenv
 from discord.ext import commands
 from retrieve import get_daily_info
@@ -45,5 +46,6 @@ async def check_tick(ctx, arg):
    
     get_daily_info(symbol)
     print(company_name, company_url, current, opening, closing, high, low)
+    await ctx.send(file = discord.File('chart.png'))
 
 bot.run(TOKEN)
