@@ -3,7 +3,9 @@ import requests
 import discord
 from dotenv import load_dotenv
 from discord.ext import commands
+from discord.utils import get
 from retrieve import get_daily_info
+from voice import get_TextToSpeech
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -16,8 +18,8 @@ bot = commands.Bot(command_prefix='!')
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
     
-@bot.command(name='tick')
-async def check_tick(ctx, arg):
+@bot.command(pass_context=True)
+async def tick(ctx, arg):
     symbol = arg.upper()
     url = 'https://finnhub.io/api/v1/quote?symbol=%s&token=%s' % (symbol, FINNHUB)
     url_info = 'https://finnhub.io/api/v1/stock/profile2?symbol=%s&token=%s' % (symbol, FINNHUB)
@@ -28,9 +30,6 @@ async def check_tick(ctx, arg):
     print(r.json())
     print(r_info.json())
     
-    start = '2020-09-14'
-    end = '2020-09-14'
-
     response = r.json()
     response_info = r_info.json()
 
@@ -45,5 +44,5 @@ async def check_tick(ctx, arg):
     get_daily_info(symbol)
     print(company_name, company_url, current, opening, closing, high, low)
     await ctx.send(file = discord.File('chart.png'))
-
+   
 bot.run(TOKEN)
