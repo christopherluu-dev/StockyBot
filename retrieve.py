@@ -32,7 +32,7 @@ def get_daily_info(symbol='AAPL', period = '1d', data_intervals='1m'):
     plt.ylabel('PRICE', fontsize=16)
     
     #Saves the graph as an image for viewing
-    plt.savefig('chart.png',dpi = 200)
+    plt.savefig('resources/chart.png',dpi = 200)
     
     #FOR DEBUGGING
     #plt.show()
