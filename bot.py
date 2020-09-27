@@ -12,7 +12,6 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 FINNHUB = os.getenv('FINNHUB_API')
 
-
 bot = commands.Bot(command_prefix='!')
 
 @bot.event
@@ -22,36 +21,76 @@ async def on_ready():
 @bot.command(pass_context=True)
 async def tick(ctx, arg):
     symbol = arg.upper()
-    url = 'https://finnhub.io/api/v1/quote?symbol=%s&token=%s' % (symbol, FINNHUB)
-    url_info = 'https://finnhub.io/api/v1/stock/profile2?symbol=%s&token=%s' % (symbol, FINNHUB)
+    url_info = f'https://finnhub.io/api/v1/stock/profile2?symbol={symbol}&token={FINNHUB}'
+    
+    url = f'https://yahoo-finance15.p.rapidapi.com/api/yahoo/qu/quote/{symbol}'
 
-    r = requests.get(url)
+    headers = {
+                'x-rapidapi-host': 'yahoo-finance15.p.rapidapi.com',
+                'x-rapidapi-key': 'abb323c569mshcb7668a99253ae7p188886jsncd1eae2507a2'
+              }
+
+    response = requests.request("GET", url, headers=headers)
+
     r_info = requests.get(url_info)
     
-    print(r.json())
+    print(response.json())
     print(r_info.json())
     
-    response = r.json()
+    response = response.json()
     response_info = r_info.json()
 
-    company_name = response_info['name']
-    company_url = response_info['weburl']
-    current = response['c']
-    opening = response['o']
-    closing = response['pc']
-    high = response['h']
-    low = response['l']
+    company_name = response[0]['shortName']
+    
+    if len(response_info) != 0:
+        company_url = response_info['weburl']
+    else:
+        company_url = ''
+    current = response[0]['regularMarketPrice']
+    opening = response[0]['regularMarketOpen']
+    closing = response[0]['regularMarketPreviousClose']
+    high = response[0]['regularMarketDayHigh']
+    low = response[0]['regularMarketDayLow']
+    
+    
+    if current >= closing:
+        diff = current - closing
+        up_down = True
+    elif current < closing:
+        diff = closing - current
+        up_down = False
 
-    get_daily_info(symbol)
-    print(company_name, company_url, current, opening, closing, high, low)
+    get_daily_info(symbol, company_name, up_down, closing)
+    print(company_name, current, opening, closing, high, low)
 
     image_url = './resources/chart.png'
-    chart_file = discord.File(image_url, filename='chart.png')
-    embed = discord.Embed(title = company_name, description= '', url= company_url)
-    embed.set_image(url = "attachment://chart.png")
+    chart_file = discord.File(image_url, filename = 'chart.png')
+
+    if up_down == True:
+        if company_url != '':
+            embed = discord.Embed(title = company_name, url = company_url, description = '', colour = discord.Colour.green())
+        else:
+            embed = discord.Embed(title = company_name, description = '', colour = discord.Colour.green())
+
+    elif up_down == False:
+        if company_url != '':
+            embed = discord.Embed(title = company_name, url = company_url, description = '', colour= discord.Colour.red())
+        else:
+            embed = discord.Embed(title = company_name, description = '', colour= discord.Colour.red())
+
+        
+    embed.set_image(url = 'attachment://chart.png')
+
+    if up_down == True:
+        embed.add_field(name = 'Current', value = f'{current} +{diff:.2f}▲', inline=True)
+    elif up_down == False:
+        embed.add_field(name = 'Current', value = f'{current} -{diff:.2f}▼', inline=True)
+ 
+    embed.add_field(name = 'Opening', value = opening, inline = True)
+    embed.add_field(name = 'Prev Closing', value = closing, inline = True)
     
-    if response_info['logo'] != '':
-        embed.set_thumbnail(url = response_info['logo'])
+    if len(response_info) != 0:
+       embed.set_thumbnail(url = response_info['logo'])
 
     await ctx.send(file = chart_file, embed = embed)
     print(f'Message for tick: {company_name} has been sent')
