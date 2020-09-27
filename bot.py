@@ -11,6 +11,7 @@ from voice import get_TextToSpeech
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 FINNHUB = os.getenv('FINNHUB_API')
+RAPIDAPI = os.getenv('YAHOORAPIDAPI')
 
 bot = commands.Bot(command_prefix='!')
 
@@ -21,36 +22,35 @@ async def on_ready():
 @bot.command(pass_context=True)
 async def tick(ctx, arg):
     symbol = arg.upper()
-    url_info = f'https://finnhub.io/api/v1/stock/profile2?symbol={symbol}&token={FINNHUB}'
-    
+
+    url_info = f'https://finnhub.io/api/v1/stock/profile2?symbol={symbol}&token={FINNHUB}' 
     url = f'https://yahoo-finance15.p.rapidapi.com/api/yahoo/qu/quote/{symbol}'
 
     headers = {
                 'x-rapidapi-host': 'yahoo-finance15.p.rapidapi.com',
-                'x-rapidapi-key': 'abb323c569mshcb7668a99253ae7p188886jsncd1eae2507a2'
+                'x-rapidapi-key': RAPIDAPI
               }
 
-    response = requests.request("GET", url, headers=headers)
-
+    r = requests.request("GET", url, headers=headers)
     r_info = requests.get(url_info)
     
-    print(response.json())
+    print(r.json())
     print(r_info.json())
     
-    response = response.json()
+    r = r.json()
     response_info = r_info.json()
 
-    company_name = response[0]['shortName']
+    company_name = r[0]['shortName']
     
     if len(response_info) != 0:
         company_url = response_info['weburl']
     else:
         company_url = ''
-    current = response[0]['regularMarketPrice']
-    opening = response[0]['regularMarketOpen']
-    closing = response[0]['regularMarketPreviousClose']
-    high = response[0]['regularMarketDayHigh']
-    low = response[0]['regularMarketDayLow']
+    current = r[0]['regularMarketPrice']
+    opening = r[0]['regularMarketOpen']
+    closing = r[0]['regularMarketPreviousClose']
+    high = r[0]['regularMarketDayHigh']
+    low = r[0]['regularMarketDayLow']
     
     
     if current >= closing:
