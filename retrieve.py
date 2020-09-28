@@ -5,8 +5,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.ticker import FormatStrFormatter
-import pandas_datareader.data as web
-import pandas as pd
 from dateutil import tz
 
 def get_daily_info(symbol, company_name, up_down, closing, period = '1d', data_intervals='1m'):
